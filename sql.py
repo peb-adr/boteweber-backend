@@ -14,7 +14,7 @@ TABLES = dict()
 TABLES['news'] = (
     "CREATE TABLE IF NOT EXISTS news ("
     "  id int NOT NULL AUTO_INCREMENT,"
-    "  timestamp date NOT NULL,"
+    "  timestamp datetime NOT NULL,"
     "  title text NOT NULL,"
     "  message text NOT NULL,"
     "  PRIMARY KEY (id)"
