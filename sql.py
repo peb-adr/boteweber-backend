@@ -83,7 +83,7 @@ def post_news(data):
 
 def put_news_id(id, data):
     try:
-        curs.execute("UPDATE news SET timestamp=%s, title=%s, message=%s) WHERE id=%s",
+        curs.execute("UPDATE news SET timestamp=%s, title=%s, message=%s WHERE id=%s",
                      (data['timestamp'], data['title'], data['message'], id))
         conn.commit()
         data = get_news_id(id)
@@ -95,7 +95,7 @@ def put_news_id(id, data):
 def delete_news_id(id):
     try:
         data = get_news_id(id)
-        curs.execute("DELETE FROM news WHERE id=%s", id)
+        curs.execute("DELETE FROM news WHERE id=%s", (id,))
         conn.commit()
     except mysql.connector.Error:
         raise error.DBError
