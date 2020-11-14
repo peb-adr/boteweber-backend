@@ -1,13 +1,16 @@
 import mysql.connector
 import mysql.connector.cursor
+import mysql.connector.errors
+
+import error
 
 conn: mysql.connector.MySQLConnection
 curs: mysql.connector.cursor.MySQLCursorDict
 
 CONN_CONFIG = {
-  'user': 'boteweber',
-  'password': 'boteweber',
-  'host': '127.0.0.1'
+    'user': 'boteweber',
+    'password': 'boteweber',
+    'host': '127.0.0.1'
 }
 DB_NAME = 'boteweber'
 TABLES = dict()
@@ -52,7 +55,7 @@ def get_news():
         curs.execute("SELECT * FROM news")
         data = curs.fetchall()
     except mysql.connector.Error:
-        data = []
+        raise error.DBError
     return data
 
 
@@ -60,8 +63,10 @@ def get_news_id(id):
     try:
         curs.execute("SELECT * FROM news WHERE id=%s", (id,))
         data = curs.fetchone()
+        if not data:
+            raise error.NotFoundError
     except mysql.connector.Error:
-        data = {}
+        raise error.DBError
     return data
 
 
@@ -72,7 +77,7 @@ def post_news(data):
         conn.commit()
         data = get_news_id(curs.lastrowid)
     except mysql.connector.Error:
-        data = {}
+        raise error.DBError
     return data
 
 
@@ -81,15 +86,17 @@ def put_news_id(id, data):
         curs.execute("UPDATE news SET timestamp=%s, title=%s, message=%s) WHERE id=%s",
                      (data['timestamp'], data['title'], data['message'], id))
         conn.commit()
-        data = get_news_id(curs.lastrowid)
+        data = get_news_id(id)
     except mysql.connector.Error:
-        data = {}
+        raise error.DBError
     return data
 
 
 def delete_news_id(id):
     try:
+        data = get_news_id(id)
         curs.execute("DELETE FROM news WHERE id=%s", id)
         conn.commit()
     except mysql.connector.Error:
-        pass
+        raise error.DBError
+    return data
