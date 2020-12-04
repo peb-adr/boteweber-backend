@@ -22,6 +22,16 @@ TABLES['news'] = (
     "  message text NOT NULL,"
     "  PRIMARY KEY (id)"
     ")")
+TABLES['info'] = (
+    "CREATE TABLE IF NOT EXISTS info ("
+    "  id int NOT NULL AUTO_INCREMENT,"
+    "  text text NOT NULL,"
+    "  greets_he_top text NOT NULL,"
+    "  greets_he_bot text NOT NULL,"
+    "  greets_moin_top text NOT NULL,"
+    "  greets_moin_bot text NOT NULL,"
+    "  PRIMARY KEY (id)"
+    ")")
 
 
 def init():
@@ -97,6 +107,38 @@ def delete_news_id(id):
         data = get_news_id(id)
         curs.execute("DELETE FROM news WHERE id=%s", (id,))
         conn.commit()
+    except mysql.connector.Error:
+        raise error.DBError
+    return data
+
+
+def get_info_id(id):
+    try:
+        curs.execute("SELECT * FROM info WHERE id=%s", (id,))
+        data = curs.fetchone()
+        if not data:
+            raise error.NotFoundError
+    except mysql.connector.Error:
+        raise error.DBError
+    return data
+
+
+def put_info_id(id, data):
+    try:
+        curs.execute("UPDATE info SET "
+                     "text=%s, "
+                     "greets_he_top=%s, "
+                     "greets_he_bot=%s, "
+                     "greets_moin_top=%s, "
+                     "greets_moin_bot=%s WHERE id=%s",
+                     (data['text'],
+                      data['greets_he_top'],
+                      data['greets_he_bot'],
+                      data['greets_moin_top'],
+                      data['greets_moin_bot'],
+                      id))
+        conn.commit()
+        data = get_info_id(id)
     except mysql.connector.Error:
         raise error.DBError
     return data
