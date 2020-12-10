@@ -156,6 +156,10 @@ def validate_news(data):
         return {}
     if 'timestamp' not in data:
         data['timestamp'] = datetime.now()
+    else:
+        # TODO: parse datetime coming from angular
+        data['timestamp'] = datetime.strptime('2012-05-29T19:30:03.283Z', '%Y-%m-%dT%H:%M:%S.%fZ')
+
     return data
 
 
