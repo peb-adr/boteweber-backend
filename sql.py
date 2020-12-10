@@ -7,6 +7,8 @@ import error
 conn: mysql.connector.MySQLConnection
 curs: mysql.connector.cursor.MySQLCursorDict
 
+locked: bool
+
 CONN_CONFIG = {
     'user': 'boteweber',
     'password': 'boteweber',
@@ -15,28 +17,29 @@ CONN_CONFIG = {
 DB_NAME = 'boteweber'
 TABLES = dict()
 TABLES['news'] = (
-    "CREATE TABLE IF NOT EXISTS news ("
-    "  id int NOT NULL AUTO_INCREMENT,"
-    "  timestamp datetime NOT NULL,"
-    "  title text NOT NULL,"
-    "  message text NOT NULL,"
-    "  PRIMARY KEY (id)"
+        "CREATE TABLE IF NOT EXISTS news ("
+        "  id int NOT NULL AUTO_INCREMENT,"
+        "  timestamp datetime NOT NULL,"
+        "  title text NOT NULL,"
+        "  message text NOT NULL,"
+        "  PRIMARY KEY (id)"
     ")")
 TABLES['info'] = (
-    "CREATE TABLE IF NOT EXISTS info ("
-    "  id int NOT NULL AUTO_INCREMENT,"
-    "  text text NOT NULL,"
-    "  greets_he_top text NOT NULL,"
-    "  greets_he_bot text NOT NULL,"
-    "  greets_moin_top text NOT NULL,"
-    "  greets_moin_bot text NOT NULL,"
-    "  PRIMARY KEY (id)"
+        "CREATE TABLE IF NOT EXISTS info ("
+        "  id int NOT NULL AUTO_INCREMENT,"
+        "  text text NOT NULL,"
+        "  greets_he_top text NOT NULL,"
+        "  greets_he_bot text NOT NULL,"
+        "  greets_moin_top text NOT NULL,"
+        "  greets_moin_bot text NOT NULL,"
+        "  PRIMARY KEY (id)"
     ")")
 
 
 def init():
     global conn
     global curs
+    global locked
 
     try:
         conn = mysql.connector.connect(**CONN_CONFIG)
@@ -44,7 +47,7 @@ def init():
         print(e)
         exit(1)
 
-    curs = conn.cursor(dictionary=True)
+    curs = conn.cursor(dictionary=True, buffered=True)
     try:
         curs.execute("USE {}".format(DB_NAME))
     except mysql.connector.Error as e:
@@ -59,17 +62,36 @@ def init():
             print(e)
             exit(1)
 
+    locked = False
+
+
+def lock():
+    global locked
+
+    while locked:
+        pass
+    locked = True
+
+
+def unlock():
+    global locked
+
+    locked = False
+
 
 def get_news():
+    lock()
     try:
         curs.execute("SELECT * FROM news")
         data = curs.fetchall()
     except mysql.connector.Error:
         raise error.DBError
+    unlock()
     return data
 
 
 def get_news_id(id):
+    lock()
     try:
         curs.execute("SELECT * FROM news WHERE id=%s", (id,))
         data = curs.fetchone()
@@ -77,42 +99,50 @@ def get_news_id(id):
             raise error.NotFoundError
     except mysql.connector.Error:
         raise error.DBError
+    unlock()
     return data
 
 
 def post_news(data):
+    lock()
     try:
         curs.execute("INSERT INTO news (timestamp, title, message) VALUES (%s, %s, %s)",
                      (data['timestamp'], data['title'], data['message']))
         conn.commit()
-        data = get_news_id(curs.lastrowid)
     except mysql.connector.Error:
         raise error.DBError
+    unlock()
+    data = get_news_id(curs.lastrowid)
     return data
 
 
 def put_news_id(id, data):
+    lock()
     try:
         curs.execute("UPDATE news SET timestamp=%s, title=%s, message=%s WHERE id=%s",
                      (data['timestamp'], data['title'], data['message'], id))
         conn.commit()
-        data = get_news_id(id)
     except mysql.connector.Error:
         raise error.DBError
+    unlock()
+    data = get_news_id(id)
     return data
 
 
 def delete_news_id(id):
+    data = get_news_id(id)
+    lock()
     try:
-        data = get_news_id(id)
         curs.execute("DELETE FROM news WHERE id=%s", (id,))
         conn.commit()
     except mysql.connector.Error:
         raise error.DBError
+    unlock()
     return data
 
 
 def get_info_id(id):
+    lock()
     try:
         curs.execute("SELECT * FROM info WHERE id=%s", (id,))
         data = curs.fetchone()
@@ -120,10 +150,12 @@ def get_info_id(id):
             raise error.NotFoundError
     except mysql.connector.Error:
         raise error.DBError
+    unlock()
     return data
 
 
 def put_info_id(id, data):
+    lock()
     try:
         curs.execute("UPDATE info SET "
                      "text=%s, "
@@ -138,7 +170,8 @@ def put_info_id(id, data):
                       data['greets_moin_bot'],
                       id))
         conn.commit()
-        data = get_info_id(id)
     except mysql.connector.Error:
         raise error.DBError
+    unlock()
+    data = get_info_id(id)
     return data
