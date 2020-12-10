@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 
 import error
@@ -23,7 +23,7 @@ def get_news():
         data = []
         code = 500
 
-    return jsonify(data), code
+    return make_response(jsonify(data), code)
 
 
 @app.route('/news/<int:id>', methods=['GET'])
@@ -38,18 +38,18 @@ def get_news_id(id):
         data = {}
         code = 500
 
-    return jsonify(data), code
+    return make_response(jsonify(data), code)
 
 
 @app.route('/news', methods=['POST'])
 def post_news():
     data, code = validate_request()
     if code != 202:
-        return jsonify(data), code
+        return make_response(jsonify(data), code)
     data = validate_news(data)
 
     if not data:
-        return jsonify(data), 400
+        return make_response(jsonify(data), 400)
     try:
         data = sql.post_news(data)
         code = 201
@@ -60,17 +60,17 @@ def post_news():
         data = {}
         code = 500
 
-    return jsonify(data), code
+    return make_response(jsonify(data), code)
 
 
 @app.route('/news/<int:id>', methods=['PUT'])
 def put_news_id(id):
     data, code = validate_request()
     if code != 202:
-        return jsonify(data), code
+        return make_response(jsonify(data), code)
     data = validate_news(data)
     if not data:
-        return jsonify(data), 400
+        return make_response(jsonify(data), 400)
 
     try:
         data = sql.put_news_id(id, data)
@@ -82,7 +82,7 @@ def put_news_id(id):
         data = {}
         code = 500
 
-    return jsonify(data), code
+    return make_response(jsonify(data), code)
 
 
 @app.route('/news/<int:id>', methods=['DELETE'])
@@ -97,7 +97,7 @@ def delete_news_id(id):
         data = {}
         code = 500
 
-    return jsonify(data), code
+    return make_response(jsonify(data), code)
 
 
 @app.route('/info', methods=['GET'])
@@ -113,17 +113,17 @@ def get_info():
         data = {}
         code = 500
 
-    return jsonify(data), code
+    return make_response(jsonify(data), code)
 
 
 @app.route('/info', methods=['PUT'])
 def put_info():
     data, code = validate_request()
     if code != 202:
-        return jsonify(data), code
+        return make_response(jsonify(data), code)
     data = validate_info(data)
     if not data:
-        return jsonify(data), 400
+        return make_response(jsonify(data), 400)
 
     try:
         data = transform_info_from_json(data)
@@ -137,7 +137,7 @@ def put_info():
         data = {}
         code = 500
 
-    return jsonify(data), code
+    return make_response(jsonify(data), code)
 
 
 def validate_request():
