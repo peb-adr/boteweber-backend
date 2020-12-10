@@ -15,16 +15,17 @@ CONN_CONFIG = {
     'host': '127.0.0.1'
 }
 DB_NAME = 'boteweber'
-TABLES = dict()
-TABLES['news'] = (
+TABLES = {
+    'news': (
         "CREATE TABLE IF NOT EXISTS news ("
         "  id int NOT NULL AUTO_INCREMENT,"
         "  timestamp datetime NOT NULL,"
         "  title text NOT NULL,"
         "  message text NOT NULL,"
         "  PRIMARY KEY (id)"
-    ")")
-TABLES['info'] = (
+        ")"
+    ),
+    'info': (
         "CREATE TABLE IF NOT EXISTS info ("
         "  id int NOT NULL AUTO_INCREMENT,"
         "  text text NOT NULL,"
@@ -33,7 +34,9 @@ TABLES['info'] = (
         "  greets_moin_top text NOT NULL,"
         "  greets_moin_bot text NOT NULL,"
         "  PRIMARY KEY (id)"
-    ")")
+        ")"
+    )
+}
 
 
 def init():
