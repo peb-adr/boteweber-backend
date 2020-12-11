@@ -1,6 +1,6 @@
 boteweber-backend
 
-root dir must have file sql_conn_configh.json including db credentials in the form:
+root dir must have file sql_conn_config.json including db credentials in the form:
 
 {
     "user": "johndoe",
