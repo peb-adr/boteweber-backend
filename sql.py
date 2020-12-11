@@ -9,11 +9,6 @@ curs: mysql.connector.cursor.MySQLCursorDict
 
 locked: bool
 
-CONN_CONFIG = {
-    'user': 'boteweber',
-    'password': 'boteweber',
-    'host': '127.0.0.1'
-}
 DB_NAME = 'boteweber'
 TABLES = {
     'news': (
@@ -39,13 +34,13 @@ TABLES = {
 }
 
 
-def init():
+def init(conn_config):
     global conn
     global curs
     global locked
 
     try:
-        conn = mysql.connector.connect(**CONN_CONFIG)
+        conn = mysql.connector.connect(**conn_config)
     except mysql.connector.Error as e:
         print(e)
         exit(1)
