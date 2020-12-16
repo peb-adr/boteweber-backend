@@ -2,7 +2,8 @@ import json
 
 from src import sql, rest
 
-if __name__ == '__main__':
+
+def main():
     with open('sql_conn_config.json', 'r') as f:
         conn_config = json.loads(f.read())
         f.close()
@@ -11,3 +12,7 @@ if __name__ == '__main__':
 
     sql.init(conn_config)
     rest.serve()
+
+
+if __name__ == '__main__':
+    main()

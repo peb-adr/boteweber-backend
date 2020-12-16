@@ -9,5 +9,10 @@ setup(
         'flask',
         'flask-cors',
         'mysql-connector-python'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'boteweber-backend = src.main:main'
+        ]
+    }
 )
