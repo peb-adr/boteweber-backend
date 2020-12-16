@@ -2,7 +2,7 @@ import mysql.connector
 import mysql.connector.cursor
 import mysql.connector.errors
 
-import error
+from src import error
 
 conn: mysql.connector.MySQLConnection
 curs: mysql.connector.cursor.MySQLCursorDict

@@ -3,8 +3,7 @@ from datetime import datetime
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 
-import error
-import sql
+from src import sql, error
 
 app = Flask(__name__)
 CORS(app)

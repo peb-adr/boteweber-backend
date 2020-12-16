@@ -1,7 +1,6 @@
 import json
 
-import rest
-import sql
+from src import sql, rest
 
 if __name__ == '__main__':
     with open('sql_conn_config.json', 'r') as f:
