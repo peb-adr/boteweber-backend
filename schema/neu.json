@@ -1,0 +1,43 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://boteweber.de/neu.json",
+    "type": "object",
+    "title": "The neu schema",
+    "default": {},
+    "examples": [
+        {
+            "id": 1,
+            "message": "<p>Message</p>",
+            "timestamp": "Tue, 29 May 2012 19:30:03 GMT",
+            "title": "<p>Title</p>"
+        }
+    ],
+    "required": [
+        "title",
+        "message",
+        "timestamp"
+    ],
+    "properties": {
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "id"
+        },
+        "title": {
+            "$id": "#/properties/title",
+            "type": "string",
+            "title": "title"
+        },
+        "message": {
+            "$id": "#/properties/message",
+            "type": "string",
+            "title": "message"
+        },
+        "timestamp": {
+            "$id": "#/properties/timestamp",
+            "type": "string",
+            "title": "timestamp"
+        }
+    },
+    "additionalProperties": false
+}

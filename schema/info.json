@@ -1,0 +1,51 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://boteweber.de/info.json",
+    "type": "object",
+    "title": "The info schema",
+    "default": {},
+    "examples": [
+        {
+            "text": "<p>text</p>",
+            "greet_ny_top": "<p>greet</p>",
+            "greet_ny_bot": "<p>greet</p>",
+            "greet_no_top": "<p>greet</p>",
+            "greet_no_bot": "<p>greet</p>"
+        }
+    ],
+    "required": [
+        "text",
+        "greet_ny_top",
+        "greet_ny_bot",
+        "greet_no_top",
+        "greet_no_bot"
+    ],
+    "properties": {
+        "text": {
+            "$id": "#/properties/text",
+            "type": "string",
+            "title": "text"
+        },
+        "greet_ny_top": {
+            "$id": "#/properties/greet_ny_top",
+            "type": "string",
+            "title": "greet_ny_top"
+        },
+        "greet_ny_bot": {
+            "$id": "#/properties/greet_ny_bot",
+            "type": "string",
+            "title": "greet_ny_bot"
+        },
+        "greet_no_top": {
+            "$id": "#/properties/greet_no_top",
+            "type": "string",
+            "title": "greet_no_top"
+        },
+        "greet_no_bot": {
+            "$id": "#/properties/greet_no_bot",
+            "type": "string",
+            "title": "greet_no_bot"
+        }
+    },
+    "additionalProperties": false
+}
