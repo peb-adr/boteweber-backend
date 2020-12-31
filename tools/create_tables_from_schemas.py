@@ -19,7 +19,7 @@ def main():
     for t in TABLES:
         table_queries.append("DROP TABLE IF EXISTS " + t['name'] + ";")
         s = "CREATE TABLE " + t['name'] + " (id INT NOT NULL AUTO_INCREMENT, "
-        d = schema.get(t['schema'], path_prefix='..')
+        d = schema.get(t['schema'])
         for p in d['required']:
             s += p + " " + sql_type(d['properties'][p]['type']) + " NOT NULL, "
         s += "PRIMARY KEY (id));"
