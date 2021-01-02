@@ -21,6 +21,11 @@
         "greet_no_bot"
     ],
     "properties": {
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "id"
+        },
         "text": {
             "$id": "#/properties/text",
             "type": "string",

@@ -4,6 +4,6 @@
     "type": "array",
     "title": "The news schema",
     "default": [],
-    "items": { "$ref": "neu.json" },
+    "items": { "$ref": "file:schema/neu.json" },
     "additionalItems": false
 }
