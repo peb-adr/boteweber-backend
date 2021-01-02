@@ -15,7 +15,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'boteweber-backend = src.main:main'
+            'boteweber-backend = src.main:main',
+            'boteweber-create_tables = tools.create_tables_from_schemas:main'
         ]
     }
 )
