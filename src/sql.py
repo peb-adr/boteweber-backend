@@ -4,6 +4,7 @@ import mysql.connector.errors
 from threading import Lock
 
 from src import error
+from src import util
 
 conn: mysql.connector.MySQLConnection
 curs: mysql.connector.cursor.MySQLCursorDict
@@ -64,99 +65,73 @@ def init(conn_config):
     lock = Lock()
 
 
-def get_news():
+def select(table):
     lock.acquire()
     try:
-        curs.execute("SELECT * FROM news")
+        curs.execute("SELECT * FROM " + table)
         data = curs.fetchall()
-    except mysql.connector.Error:
-        raise error.DBError
-    lock.release()
+    except mysql.connector.Error as e:
+        raise error.DBError(e.msg)
+    finally:
+        lock.release()
     return data
 
 
-def get_news_id(id):
+def select_by_id(table, id):
     lock.acquire()
     try:
-        curs.execute("SELECT * FROM news WHERE id=%s", (id,))
+        curs.execute("SELECT * FROM " + table + " WHERE id=%s", (id,))
         data = curs.fetchone()
         if not data:
-            raise error.NotFoundError
-    except mysql.connector.Error:
-        raise error.DBError
-    lock.release()
+            raise error.NotFoundError("Item with id=" + str(id) + " not found in " + table)
+    except mysql.connector.Error as e:
+        raise error.DBError(e.msg)
+    finally:
+        lock.release()
     return data
 
 
-def post_news(data):
+def insert(table, data):
     lock.acquire()
     try:
-        curs.execute("INSERT INTO news (timestamp, title, message) VALUES (%s, %s, %s)",
-                     (data['timestamp'], data['title'], data['message']))
+        cols = util.commasep_formatted_list(data, "{0}")
+        vals = util.commasep_formatted_list(data, "%({0})s")
+        curs.execute("INSERT INTO " + table + " (" + cols + ") VALUES (" + vals + ")", data)
         conn.commit()
-    except mysql.connector.Error:
-        raise error.DBError
-    lock.release()
-    data = get_news_id(curs.lastrowid)
+    except mysql.connector.Error as e:
+        raise error.DBError(e.errno)
+    finally:
+        lock.release()
+    data = select_by_id(table, curs.lastrowid)
     return data
 
 
-def put_news_id(id, data):
+def update_by_id(table, id, data):
+    # check if exists
+    select_by_id(table, id)
     lock.acquire()
     try:
-        curs.execute("UPDATE news SET timestamp=%s, title=%s, message=%s WHERE id=%s",
-                     (data['timestamp'], data['title'], data['message'], id))
+        # ensure id can not be changed
+        data['id'] = id
+        assigns = util.commasep_formatted_list(data, "{0}=%({0})s")
+        curs.execute("UPDATE " + table + " SET " + assigns + " WHERE id=%(id)s", data)
         conn.commit()
-    except mysql.connector.Error:
-        raise error.DBError
-    lock.release()
-    data = get_news_id(id)
+    except mysql.connector.Error as e:
+        raise error.DBError(e.msg)
+    finally:
+        lock.release()
+    data = select_by_id(table, id)
     return data
 
 
-def delete_news_id(id):
-    data = get_news_id(id)
+def delete_by_id(table, id):
+    data = select_by_id(table, id)
     lock.acquire()
     try:
-        curs.execute("DELETE FROM news WHERE id=%s", (id,))
+        curs.execute("DELETE FROM " + table + " WHERE id=%s", (id,))
         conn.commit()
-    except mysql.connector.Error:
-        raise error.DBError
-    lock.release()
-    return data
-
-
-def get_info_id(id):
-    lock.acquire()
-    try:
-        curs.execute("SELECT * FROM info WHERE id=%s", (id,))
-        data = curs.fetchone()
-        if not data:
-            raise error.NotFoundError
-    except mysql.connector.Error:
-        raise error.DBError
-    lock.release()
-    return data
-
-
-def put_info_id(id, data):
-    lock.acquire()
-    try:
-        curs.execute("UPDATE info SET "
-                     "text=%s, "
-                     "greets_he_top=%s, "
-                     "greets_he_bot=%s, "
-                     "greets_moin_top=%s, "
-                     "greets_moin_bot=%s WHERE id=%s",
-                     (data['text'],
-                      data['greets_he_top'],
-                      data['greets_he_bot'],
-                      data['greets_moin_top'],
-                      data['greets_moin_bot'],
-                      id))
-        conn.commit()
-    except mysql.connector.Error:
-        raise error.DBError
-    lock.release()
-    data = get_info_id(id)
+    except mysql.connector.Error as e:
+        raise error.DBError(e.msg)
+    finally:
+        lock.release()
     return data

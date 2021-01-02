@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 
 from src import sql, error
+from src import schema
 
 app = Flask(__name__)
 CORS(app)
@@ -13,13 +14,25 @@ def serve():
     app.run(port=26548, debug=True)
 
 
+# following HTTP status codes are used:
+# 200 - OK
+# 201 - Created
+# 202 - Accepted
+# 400 - Bad Request
+# 404 - Not Found
+# 415 - Unsupported Media Type
+# 500 - Internal Server Error
+
+
 @app.route('/news', methods=['GET'])
 def get_news():
     try:
-        data = sql.get_news()
+        data = sql.select('news')
+        for i in range(0, len(data)):
+            data[i] = schema.convert_instance_formatted_properties_to_json('neu', data[i])
         code = 200
-    except error.DBError:
-        data = []
+    except error.DBError as e:
+        data = make_error_data(e)
         code = 500
 
     return make_response(jsonify(data), code)
@@ -28,13 +41,14 @@ def get_news():
 @app.route('/news/<int:id>', methods=['GET'])
 def get_news_id(id):
     try:
-        data = sql.get_news_id(id)
+        data = sql.select_by_id('news', id)
+        data = schema.convert_instance_formatted_properties_to_json('neu', data)
         code = 200
-    except error.NotFoundError:
-        data = {}
+    except error.NotFoundError as e:
+        data = make_error_data(e)
         code = 404
-    except error.DBError:
-        data = {}
+    except error.DBError as e:
+        data = make_error_data(e)
         code = 500
 
     return make_response(jsonify(data), code)
@@ -45,18 +59,22 @@ def post_news():
     data, code = validate_request()
     if code != 202:
         return make_response(jsonify(data), code)
-    data = validate_news(data)
 
-    if not data:
-        return make_response(jsonify(data), 400)
     try:
-        data = sql.post_news(data)
+        schema.validate('neu', data)
+    except error.ValidationError as e:
+        return make_response(jsonify(make_error_data(e)), 400)
+
+    try:
+        data = schema.convert_instance_formatted_properties_from_json('neu', data)
+        data = sql.insert('news', data)
+        data = schema.convert_instance_formatted_properties_to_json('neu', data)
         code = 201
-    except error.NotFoundError:
-        data = {}
+    except error.NotFoundError as e:
+        data = make_error_data(e)
         code = 404
-    except error.DBError:
-        data = {}
+    except error.DBError as e:
+        data = make_error_data(e)
         code = 500
 
     return make_response(jsonify(data), code)
@@ -67,18 +85,22 @@ def put_news_id(id):
     data, code = validate_request()
     if code != 202:
         return make_response(jsonify(data), code)
-    data = validate_news(data)
-    if not data:
-        return make_response(jsonify(data), 400)
 
     try:
-        data = sql.put_news_id(id, data)
+        schema.validate('neu', data)
+    except error.ValidationError as e:
+        return make_response(jsonify(make_error_data(e)), 400)
+
+    try:
+        data = schema.convert_instance_formatted_properties_from_json('neu', data)
+        data = sql.update_by_id('news', id, data)
+        data = schema.convert_instance_formatted_properties_to_json('neu', data)
         code = 200
-    except error.NotFoundError:
-        data = {}
+    except error.NotFoundError as e:
+        data = make_error_data(e)
         code = 404
-    except error.DBError:
-        data = {}
+    except error.DBError as e:
+        data = make_error_data(e)
         code = 500
 
     return make_response(jsonify(data), code)
@@ -87,13 +109,13 @@ def put_news_id(id):
 @app.route('/news/<int:id>', methods=['DELETE'])
 def delete_news_id(id):
     try:
-        data = sql.delete_news_id(id)
+        data = sql.delete_by_id('news', id)
         code = 200
-    except error.NotFoundError:
-        data = {}
+    except error.NotFoundError as e:
+        data = make_error_data(e)
         code = 404
-    except error.DBError:
-        data = {}
+    except error.DBError as e:
+        data = make_error_data(e)
         code = 500
 
     return make_response(jsonify(data), code)
@@ -102,14 +124,14 @@ def delete_news_id(id):
 @app.route('/info', methods=['GET'])
 def get_info():
     try:
-        data = sql.get_info_id(1)
-        data = transform_info_to_json(data)
+        data = sql.select_by_id('info', 1)
+        data = schema.convert_instance_formatted_properties_to_json('info', data)
         code = 200
-    except error.NotFoundError:
-        data = {}
+    except error.NotFoundError as e:
+        data = make_error_data(e)
         code = 404
-    except error.DBError:
-        data = {}
+    except error.DBError as e:
+        data = make_error_data(e)
         code = 500
 
     return make_response(jsonify(data), code)
@@ -120,20 +142,22 @@ def put_info():
     data, code = validate_request()
     if code != 202:
         return make_response(jsonify(data), code)
-    data = validate_info(data)
-    if not data:
-        return make_response(jsonify(data), 400)
 
     try:
-        data = transform_info_from_json(data)
-        data = sql.put_info_id(1, data)
-        data = transform_info_to_json(data)
+        schema.validate('info', data)
+    except error.ValidationError as e:
+        return make_response(jsonify(make_error_data(e)), 400)
+
+    try:
+        data = schema.convert_instance_formatted_properties_from_json('info', data)
+        data = sql.update_by_id('info', 1, data)
+        data = schema.convert_instance_formatted_properties_to_json('info', data)
         code = 200
-    except error.NotFoundError:
-        data = {}
+    except error.NotFoundError as e:
+        data = make_error_data(e)
         code = 404
-    except error.DBError:
-        data = {}
+    except error.DBError as e:
+        data = make_error_data(e)
         code = 500
 
     return make_response(jsonify(data), code)
@@ -141,61 +165,12 @@ def put_info():
 
 def validate_request():
     if not request.is_json:
-        return {}, 415
+        return make_error_data(error.BadRequestError("Request data must be JSON")), 415
     data = request.get_json(silent=True)
     if not data:
-        return {}, 400
-    if not isinstance(data, dict):
-        return {}, 400
+        return make_error_data(error.BadRequestError("JSON data corrupt")), 400
     return data, 202
 
 
-def validate_news(data):
-    if 'title' not in data or 'message' not in data:
-        return {}
-    if 'timestamp' not in data:
-        data['timestamp'] = datetime.now()
-    else:
-        # TODO: parse datetime coming from angular
-        data['timestamp'] = datetime.strptime('2012-05-29T19:30:03.283Z', '%Y-%m-%dT%H:%M:%S.%fZ')
-
-    return data
-
-
-def validate_info(data):
-    if 'text' not in data or\
-            'greets' not in data or \
-            'he' not in data['greets'] or \
-            'top' not in data['greets']['he'] or \
-            'bot' not in data['greets']['he'] or \
-            'moin' not in data['greets'] or \
-            'top' not in data['greets']['moin'] or \
-            'bot' not in data['greets']['moin']:
-        return {}
-    return data
-
-
-def transform_info_from_json(data):
-    return {
-        'text': data['text'],
-        'greets_he_top': data['greets']['he']['top'],
-        'greets_he_bot': data['greets']['he']['bot'],
-        'greets_moin_top': data['greets']['moin']['top'],
-        'greets_moin_bot': data['greets']['moin']['bot']
-    }
-
-
-def transform_info_to_json(data):
-    return {
-        'text': data['text'],
-        'greets': {
-            'he': {
-                'top': data['greets_he_top'],
-                'bot': data['greets_he_bot']
-            },
-            'moin': {
-                'top': data['greets_moin_top'],
-                'bot': data['greets_moin_bot']
-            }
-        }
-    }
+def make_error_data(e):
+    return {'error': e.message}

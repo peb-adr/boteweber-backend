@@ -8,6 +8,9 @@ setup(
     install_requires=[
         'flask',
         'flask-cors',
+        'jsonschema',
+        'strict-rfc3339',  # date-time format validation
+        'python-dateutil',
         'mysql-connector-python'
     ],
     entry_points={
