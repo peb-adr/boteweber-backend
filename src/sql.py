@@ -94,6 +94,9 @@ def select_by_id(table, id):
 def insert(table, data):
     lock.acquire()
     try:
+        # ensure a new entry gets assigned a new id by the DB
+        if 'id' in data:
+            del data['id']
         cols = util.commasep_formatted_list(data, "{0}")
         vals = util.commasep_formatted_list(data, "%({0})s")
         curs.execute("INSERT INTO " + table + " (" + cols + ") VALUES (" + vals + ")", data)
