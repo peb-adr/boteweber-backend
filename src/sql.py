@@ -65,10 +65,10 @@ def init(conn_config):
     lock = Lock()
 
 
-def select(table):
+def select(table, orderby):
     lock.acquire()
     try:
-        curs.execute("SELECT * FROM " + table)
+        curs.execute("SELECT * FROM " + table + " ORDER BY " + ", ".join(orderby))
         data = curs.fetchall()
     except mysql.connector.Error as e:
         raise error.DBError(e.msg)

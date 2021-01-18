@@ -9,13 +9,15 @@
             "id": 1,
             "message": "<p>Message</p>",
             "timestamp": "Tue, 29 May 2012 19:30:03 GMT",
-            "title": "<p>Title</p>"
+            "title": "<p>Title</p>",
+            "priority": 1
         }
     ],
     "required": [
         "title",
         "message",
-        "timestamp"
+        "timestamp",
+        "priority"
     ],
     "properties": {
         "id": {
@@ -38,6 +40,11 @@
             "type": "string",
             "format": "date-time",
             "title": "timestamp"
+        },
+        "priority": {
+            "$id": "#/properties/priority",
+            "type": "integer",
+            "title": "priority"
         }
     },
     "additionalProperties": false

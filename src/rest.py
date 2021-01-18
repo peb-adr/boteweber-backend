@@ -27,7 +27,7 @@ def serve():
 @app.route('/news', methods=['GET'])
 def get_news():
     try:
-        data = sql.select('news')
+        data = sql.select('news', ['priority DESC', 'timestamp DESC'])
         for i in range(0, len(data)):
             data[i] = schema.convert_instance_formatted_properties_to_json('neu', data[i])
         code = 200
