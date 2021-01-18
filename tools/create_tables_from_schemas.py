@@ -29,7 +29,7 @@ def main():
 
 def sql_type(json_prop):
     try:
-        if json_prop['format']:
+        if 'format' in json_prop:
             return {
                 'date-time': 'DATETIME'
             }[json_prop['format']]
