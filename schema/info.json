@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "http://boteweber.de/info.json",
     "type": "object",
-    "title": "The info schema",
+    "title": "info",
     "default": {},
     "examples": [
         {

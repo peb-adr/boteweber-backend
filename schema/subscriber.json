@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://boteweber.de/subscriber.json",
+    "type": "object",
+    "title": "subscribers",
+    "default": {},
+    "examples": [
+        {
+            "id": 1,
+            "email": "ad@example.com",
+            "name": "Ad",
+            "groups": [1]
+        }
+    ],
+    "required": [
+        "email",
+        "name",
+        "groups"
+    ],
+    "properties": {
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "id"
+        },
+        "email": {
+            "$id": "#/properties/email",
+            "type": "string",
+            "format": "email",
+            "title": "email"
+        },
+        "name": {
+            "$id": "#/properties/name",
+            "type": "string",
+            "title": "name"
+        },
+        "groups": {
+            "$id": "#/properties/groups",
+            "type": "array",
+            "title": "groups",
+            "items": {
+                "type": "integer"
+            }
+        }
+    },
+    "additionalProperties": false
+}

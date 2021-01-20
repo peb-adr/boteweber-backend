@@ -1,30 +1,47 @@
-from src import schema
+from os import listdir
 
-TABLES = [
-    {
-        'name': 'info',
-        'schema': 'info'
-    },
-    {
-        'name': 'news',
-        'schema': 'neu'
-    }
-]
+from src import schema
 
 
 def main():
     table_queries = list()
 
-    for t in TABLES:
-        table_queries.append("DROP TABLE IF EXISTS " + t['name'] + ";")
-        s = "CREATE TABLE " + t['name'] + " (id INT NOT NULL AUTO_INCREMENT, "
-        d = schema.get(t['schema'])
-        for p in d['required']:
-            s += p + " " + sql_type(d['properties'][p]) + " NOT NULL, "
-        s += "PRIMARY KEY (id));"
-        table_queries.append(s)
+    for filename in listdir('schema'):
+        if filename.endswith('.json'):
+            table_queries += query_create_table(filename[:-5])
 
     return '\n'.join(table_queries)
+
+
+def query_create_table(schema_name):
+    d = schema.get(schema_name)
+    if not d:
+        return [""]
+    relation_table_queries = list()
+
+    s = "CREATE TABLE " + d['title'] + " (id INT NOT NULL AUTO_INCREMENT, "
+    for p in d['required']:
+        # if prop contains other ids => create relation table
+        if d['properties'][p]['type'] == 'array':
+            relation_table_queries += query_create_relation_table(d['title'], p)
+        else:
+            s += p + " " + sql_type(d['properties'][p]) + " NOT NULL, "
+    s += "PRIMARY KEY (id));"
+
+    return ["DROP TABLE IF EXISTS " + d['title'] + ";", s] + relation_table_queries
+
+
+def query_create_relation_table(from_table, to_table):
+    s = "CREATE TABLE " + from_table + "_" + to_table + "("
+    s += "id INT NOT NULL AUTO_INCREMENT, "
+    s += from_table + "_id INT NOT NULL, "
+    s += to_table + "_id INT NOT NULL, "
+    s += "PRIMARY KEY (id), "
+    s += "FOREIGN KEY (" + from_table + "_id) REFERENCES " + from_table + "(id), "
+    s += "FOREIGN KEY (" + to_table + "_id) REFERENCES " + to_table + "(id)"
+    s += ");"
+
+    return ["DROP TABLE IF EXISTS " + from_table + "_" + to_table + ";", s]
 
 
 def sql_type(json_prop):

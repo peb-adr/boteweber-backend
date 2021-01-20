@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://boteweber.de/group.json",
+    "type": "object",
+    "title": "groups",
+    "default": {},
+    "examples": [
+        {
+            "id": 1,
+            "name": "alle",
+            "subscribers": [1]
+        }
+    ],
+    "required": [
+        "name",
+        "subscribers"
+    ],
+    "properties": {
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "id"
+        },
+        "name": {
+            "$id": "#/properties/name",
+            "type": "string",
+            "title": "name"
+        },
+        "subscribers": {
+            "$id": "#/properties/subscribers",
+            "type": "array",
+            "title": "subscribers",
+            "items": {
+                "type": "integer"
+            }
+        }
+    },
+    "additionalProperties": false
+}

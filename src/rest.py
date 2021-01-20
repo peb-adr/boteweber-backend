@@ -24,12 +24,17 @@ def serve():
 # 500 - Internal Server Error
 
 
+#
+# NEWS
+#
+
+
 @app.route('/news', methods=['GET'])
 def get_news():
     try:
         data = sql.select('news', ['priority DESC', 'timestamp DESC'])
         for i in range(0, len(data)):
-            data[i] = schema.convert_instance_formatted_properties_to_json('neu', data[i])
+            data[i] = schema.convert_instance_formatted_properties_to_json('news', data[i])
         code = 200
     except error.DBError as e:
         data = make_error_data(e)
@@ -42,7 +47,7 @@ def get_news():
 def get_news_id(id):
     try:
         data = sql.select_by_id('news', id)
-        data = schema.convert_instance_formatted_properties_to_json('neu', data)
+        data = schema.convert_instance_formatted_properties_to_json('news', data)
         code = 200
     except error.NotFoundError as e:
         data = make_error_data(e)
@@ -61,14 +66,14 @@ def post_news():
         return make_response(jsonify(data), code)
 
     try:
-        schema.validate('neu', data)
+        schema.validate('news', data)
     except error.ValidationError as e:
         return make_response(jsonify(make_error_data(e)), 400)
 
     try:
-        data = schema.convert_instance_formatted_properties_from_json('neu', data)
+        data = schema.convert_instance_formatted_properties_from_json('news', data)
         data = sql.insert('news', data)
-        data = schema.convert_instance_formatted_properties_to_json('neu', data)
+        data = schema.convert_instance_formatted_properties_to_json('news', data)
         code = 201
     except error.NotFoundError as e:
         data = make_error_data(e)
@@ -87,14 +92,14 @@ def put_news_id(id):
         return make_response(jsonify(data), code)
 
     try:
-        schema.validate('neu', data)
+        schema.validate('news', data)
     except error.ValidationError as e:
         return make_response(jsonify(make_error_data(e)), 400)
 
     try:
-        data = schema.convert_instance_formatted_properties_from_json('neu', data)
+        data = schema.convert_instance_formatted_properties_from_json('news', data)
         data = sql.update_by_id('news', id, data)
-        data = schema.convert_instance_formatted_properties_to_json('neu', data)
+        data = schema.convert_instance_formatted_properties_to_json('news', data)
         code = 200
     except error.NotFoundError as e:
         data = make_error_data(e)
@@ -119,6 +124,11 @@ def delete_news_id(id):
         code = 500
 
     return make_response(jsonify(data), code)
+
+
+#
+# INFO
+#
 
 
 @app.route('/info', methods=['GET'])

@@ -78,3 +78,39 @@ def convert_instance_formatted_properties_to_json(name, instance):
                 instance[k] = instance[k].isoformat() + ('Z' if not instance[k].tzinfo else '')
 
     return instance
+
+
+def get_non_relational_properties(name):
+    schema = get(name)
+    props = list()
+    for p in schema['required']:
+        if schema['properties'][p]['type'] != 'array':
+            props.append(p)
+    return props
+
+
+def get_instance_non_relational_data(name, instance):
+    schema = get(name)
+    data = dict()
+    for p in schema['required']:
+        if schema['properties'][p]['type'] != 'array':
+            data[p] = instance[p]
+    return data
+
+
+def get_relational_properties(name):
+    schema = get(name)
+    props = list()
+    for p in schema['required']:
+        if schema['properties'][p]['type'] == 'array':
+            props.append(p)
+    return props
+
+
+def get_instance_relational_data(name, instance):
+    schema = get(name)
+    data = dict()
+    for p in schema['required']:
+        if schema['properties'][p]['type'] == 'array':
+            data[p] = instance[p]
+    return data
