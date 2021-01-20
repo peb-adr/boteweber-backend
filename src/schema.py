@@ -10,10 +10,31 @@ from jsonschema.validators import validator_for
 from src import error
 
 
+cache = dict()
+
+
 def get(name):
-    with open('schema/' + name + '.json', 'r') as f:
-        data = load(f)
-        f.close()
+    # return if cached
+    if name in cache:
+        return cache[name]
+
+    # load schema json
+    try:
+        with open('schema/' + name + '.json', 'r') as f:
+            data = load(f)
+            f.close()
+    except FileNotFoundError:
+        data = None
+    except OSError:
+        data = None
+
+    # cache if successful, otherwise clear from cache
+    if data:
+        cache[name] = data
+    else:
+        if name in cache:
+            del cache[name]
+
     return data
 
 
