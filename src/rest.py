@@ -45,7 +45,7 @@ def get_test():
 
 @app.route('/test', methods=['POST'])
 def post_test():
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -106,7 +106,7 @@ def get_subscribers_id(id):
 
 @app.route('/subscribers', methods=['POST'])
 def post_subscribers():
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -132,7 +132,7 @@ def post_subscribers():
 
 @app.route('/subscribers/<int:id>', methods=['PUT'])
 def put_subscribers_id(id):
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -208,7 +208,7 @@ def get_groups_id(id):
 
 @app.route('/groups', methods=['POST'])
 def post_groups():
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -234,7 +234,7 @@ def post_groups():
 
 @app.route('/groups/<int:id>', methods=['PUT'])
 def put_groups_id(id):
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -310,7 +310,7 @@ def get_news_id(id):
 
 @app.route('/news', methods=['POST'])
 def post_news():
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -336,7 +336,7 @@ def post_news():
 
 @app.route('/news/<int:id>', methods=['PUT'])
 def put_news_id(id):
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -398,7 +398,7 @@ def get_info():
 
 @app.route('/info', methods=['PUT'])
 def put_info():
-    data, code = validate_request()
+    data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
 
@@ -429,13 +429,28 @@ def resolve_relations(data, schema_name):
     pass
 
 
-def validate_request():
+def validate_request_body():
     if not request.is_json:
         return make_error_data(error.BadRequestError("Request data must be JSON")), 415
     data = request.get_json(silent=True)
     if not data:
         return make_error_data(error.BadRequestError("JSON data corrupt")), 400
     return data, 202
+
+
+def validate_request_query():
+    args = dict()
+    try:
+        if 'page' in request.args:
+            args['page'] = int(request.args['page'])
+    except ValueError:
+        return make_error_data(error.BadRequestError("Argument page must be an integer")), 400
+    try:
+        if 'perpage' in request.args:
+            args['perpage'] = int(request.args['perpage'])
+    except ValueError:
+        return make_error_data(error.BadRequestError("Argument perpage must be an integer")), 400
+    return args, 202
 
 
 def make_error_data(e):
