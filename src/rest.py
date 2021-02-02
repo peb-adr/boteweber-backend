@@ -76,8 +76,19 @@ def post_test():
 
 @app.route('/subscribers', methods=['GET'])
 def get_subscribers():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
+
+    page = None
+    if 'page' in args:
+        if 'perpage' in args:
+            page = (args['page'], args['perpage'])
+        else:
+            page = (args['page'], 3)
+
     try:
-        data = sql.select('subscriber')
+        data = sql.select('subscriber', orderby=['name ASC', 'email ASC'], page=page)
         for i in range(0, len(data)):
             data[i] = schema.convert_instance_formatted_properties_to_json('subscriber', data[i])
         code = 200
