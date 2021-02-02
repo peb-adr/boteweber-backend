@@ -67,14 +67,15 @@ def init(conn_config):
     lock = Lock()
 
 
-def select(schema_name, orderby=None):
+def select(schema_name, orderby=None, page=None):
     d = schema.get(schema_name)
 
     lock.acquire()
     try:
         # non relational
         query_orderby = " ORDER BY " + ", ".join(orderby) if orderby else ""
-        curs.execute("SELECT * FROM " + d['title'] + query_orderby)
+        query_limit = " LIMIT " + str((page[0] - 1) * page[1]) + "," + str(page[1]) if page else ""
+        curs.execute("SELECT * FROM " + d['title'] + query_orderby + query_limit)
         data = curs.fetchall()
         # relational
         for d in data:
