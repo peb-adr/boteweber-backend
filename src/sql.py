@@ -88,6 +88,22 @@ def select(schema_name, orderby=None, page=None):
     return data
 
 
+def select_ids(schema_name):
+    d = schema.get(schema_name)
+
+    lock.acquire()
+    try:
+        curs.execute("SELECT id FROM " + d['title'])
+        data = curs.fetchall()
+    except mysql.connector.Error as e:
+        raise error.DBError(e.msg)
+    finally:
+        lock.release()
+
+    # extract ids from dicts into a list
+    return [d['id'] for d in data]
+
+
 def select_by_id(schema_name, id):
     d = schema.get(schema_name)
 

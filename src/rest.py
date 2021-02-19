@@ -88,9 +88,12 @@ def get_subscribers():
             page = (args['page'], 3)
 
     try:
-        data = sql.select('subscriber', orderby=['name ASC', 'email ASC'], page=page)
-        for i in range(0, len(data)):
-            data[i] = schema.convert_instance_formatted_properties_to_json('subscriber', data[i])
+        if 'idsonly' not in args:
+            data = sql.select('subscriber', orderby=['name ASC', 'email ASC'], page=page)
+            for i in range(0, len(data)):
+                data[i] = schema.convert_instance_formatted_properties_to_json('subscriber', data[i])
+        else:
+            data = sql.select_ids('subscriber')
         code = 200
     except error.DBError as e:
         data = make_error_data(e)
@@ -451,16 +454,26 @@ def validate_request_body():
 
 def validate_request_query():
     args = dict()
-    try:
-        if 'page' in request.args:
-            args['page'] = int(request.args['page'])
-    except ValueError:
-        return make_error_data(error.BadRequestError("Argument page must be an integer")), 400
-    try:
-        if 'perpage' in request.args:
-            args['perpage'] = int(request.args['perpage'])
-    except ValueError:
-        return make_error_data(error.BadRequestError("Argument perpage must be an integer")), 400
+    for k, v in request.args.items():
+        try:
+            if k == 'page':
+                args['page'] = int(v)
+            if k == 'perpage':
+                if 'page' not in request.args:
+                    raise error.BadRequestError("Query parameter perpage requires query parameter page")
+                args['perpage'] = int(v)
+            if k == 'search':
+                args['search'] = v
+            if k == 'idsonly':
+                if len(request.args) > 1:
+                    raise error.BadRequestError("Query parameter idsonly is incompatible with other query parameters")
+                args['idsonly'] = True
+        except KeyError:
+            return make_error_data(error.BadRequestError("Query parameter " + k + " not recognized")), 400
+        except ValueError:
+            return make_error_data(error.BadRequestError("Query parameter " + k + " must be an integer")), 400
+        except error.BadRequestError as e:
+            return make_error_data(e), 400
     return args, 202
 
 
