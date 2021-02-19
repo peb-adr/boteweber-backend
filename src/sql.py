@@ -88,12 +88,13 @@ def select(schema_name, orderby=None, page=None):
     return data
 
 
-def select_ids(schema_name):
+def select_ids(schema_name, orderby=None):
     d = schema.get(schema_name)
 
     lock.acquire()
     try:
-        curs.execute("SELECT id FROM " + d['title'])
+        query_orderby = " ORDER BY " + ", ".join(orderby) if orderby else ""
+        curs.execute("SELECT id FROM " + d['title'] + query_orderby)
         data = curs.fetchall()
     except mysql.connector.Error as e:
         raise error.DBError(e.msg)

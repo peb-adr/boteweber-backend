@@ -31,6 +31,9 @@ def serve():
 
 @app.route('/test', methods=['GET'])
 def get_test():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.select('subscriber')
         for i in range(0, len(data)):
@@ -45,6 +48,9 @@ def get_test():
 
 @app.route('/test', methods=['POST'])
 def post_test():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -76,7 +82,7 @@ def post_test():
 
 @app.route('/subscribers', methods=['GET'])
 def get_subscribers():
-    args, code = validate_request_query()
+    args, code = validate_request_query(['page', 'perpage', 'idsonly'])
     if code != 202:
         return make_response(jsonify(args), code)
 
@@ -93,7 +99,7 @@ def get_subscribers():
             for i in range(0, len(data)):
                 data[i] = schema.convert_instance_formatted_properties_to_json('subscriber', data[i])
         else:
-            data = sql.select_ids('subscriber')
+            data = sql.select_ids('subscriber', orderby=['name ASC', 'email ASC'])
         code = 200
     except error.DBError as e:
         data = make_error_data(e)
@@ -104,6 +110,9 @@ def get_subscribers():
 
 @app.route('/subscribers/<int:id>', methods=['GET'])
 def get_subscribers_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.select_by_id('subscriber', id)
         data = schema.convert_instance_formatted_properties_to_json('subscriber', data)
@@ -120,6 +129,9 @@ def get_subscribers_id(id):
 
 @app.route('/subscribers', methods=['POST'])
 def post_subscribers():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -146,6 +158,9 @@ def post_subscribers():
 
 @app.route('/subscribers/<int:id>', methods=['PUT'])
 def put_subscribers_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -172,6 +187,9 @@ def put_subscribers_id(id):
 
 @app.route('/subscribers/<int:id>', methods=['DELETE'])
 def delete_subscribers_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.delete_by_id('subscriber', id)
         code = 200
@@ -192,6 +210,9 @@ def delete_subscribers_id(id):
 
 @app.route('/groups', methods=['GET'])
 def get_groups():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.select('group')
         for i in range(0, len(data)):
@@ -206,6 +227,9 @@ def get_groups():
 
 @app.route('/groups/<int:id>', methods=['GET'])
 def get_groups_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.select_by_id('group', id)
         data = schema.convert_instance_formatted_properties_to_json('group', data)
@@ -222,6 +246,9 @@ def get_groups_id(id):
 
 @app.route('/groups', methods=['POST'])
 def post_groups():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -248,6 +275,9 @@ def post_groups():
 
 @app.route('/groups/<int:id>', methods=['PUT'])
 def put_groups_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -274,6 +304,9 @@ def put_groups_id(id):
 
 @app.route('/groups/<int:id>', methods=['DELETE'])
 def delete_groups_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.delete_by_id('group', id)
         code = 200
@@ -294,10 +327,23 @@ def delete_groups_id(id):
 
 @app.route('/news', methods=['GET'])
 def get_news():
+    args, code = validate_request_query(['page', 'perpage', 'idsonly'])
+    if code != 202:
+        return make_response(jsonify(args), code)
+
+    page = None
+    if 'page' in args:
+        if 'perpage' in args:
+            page = (args['page'], args['perpage'])
+        else:
+            page = (args['page'], 3)
     try:
-        data = sql.select('news', ['priority DESC', 'timestamp DESC'])
-        for i in range(0, len(data)):
-            data[i] = schema.convert_instance_formatted_properties_to_json('news', data[i])
+        if 'idsonly' not in args:
+            data = sql.select('news', orderby=['priority DESC', 'timestamp DESC'], page=page)
+            for i in range(0, len(data)):
+                data[i] = schema.convert_instance_formatted_properties_to_json('news', data[i])
+        else:
+            data = sql.select_ids('news', orderby=['priority DESC', 'timestamp DESC'])
         code = 200
     except error.DBError as e:
         data = make_error_data(e)
@@ -308,6 +354,9 @@ def get_news():
 
 @app.route('/news/<int:id>', methods=['GET'])
 def get_news_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.select_by_id('news', id)
         data = schema.convert_instance_formatted_properties_to_json('news', data)
@@ -324,6 +373,9 @@ def get_news_id(id):
 
 @app.route('/news', methods=['POST'])
 def post_news():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -350,6 +402,9 @@ def post_news():
 
 @app.route('/news/<int:id>', methods=['PUT'])
 def put_news_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -376,6 +431,9 @@ def put_news_id(id):
 
 @app.route('/news/<int:id>', methods=['DELETE'])
 def delete_news_id(id):
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.delete_by_id('news', id)
         code = 200
@@ -396,6 +454,9 @@ def delete_news_id(id):
 
 @app.route('/info', methods=['GET'])
 def get_info():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     try:
         data = sql.select_by_id('info', 1)
         data = schema.convert_instance_formatted_properties_to_json('info', data)
@@ -412,6 +473,9 @@ def get_info():
 
 @app.route('/info', methods=['PUT'])
 def put_info():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
     data, code = validate_request_body()
     if code != 202:
         return make_response(jsonify(data), code)
@@ -452,10 +516,16 @@ def validate_request_body():
     return data, 202
 
 
-def validate_request_query():
+def validate_request_query(accepted_params=None):
+    if accepted_params is None:
+        accepted_params = []
+
     args = dict()
     for k, v in request.args.items():
         try:
+            if k not in accepted_params:
+                raise error.BadRequestError("Query parameter " + k + " is not accepted by this route")
+
             if k == 'page':
                 args['page'] = int(v)
             if k == 'perpage':
