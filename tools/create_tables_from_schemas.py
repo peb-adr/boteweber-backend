@@ -4,34 +4,42 @@ from src import schema
 
 
 def main():
-    table_queries = list()
+    queries = {
+        'queries': [],
+        'queries_drop': [],
+        'queries_relation': [],
+        'queries_relation_drop': []
+    }
 
     for filename in listdir('schema'):
         if filename.endswith('.json'):
-            table_queries += query_create_table(filename[:-5])
+            query_create_table(queries, filename[:-5])
 
-    return '\n'.join(table_queries)
+    return '\n'.join(queries['queries_relation_drop'] +
+                     queries['queries_drop'] +
+                     queries['queries'] +
+                     queries['queries_relation'])
 
 
-def query_create_table(schema_name):
+def query_create_table(queries, schema_name):
     d = schema.get(schema_name)
     if not d:
-        return [""]
-    relation_table_queries = list()
+        return
 
     s = "CREATE TABLE " + d['title'] + " (id INT NOT NULL AUTO_INCREMENT, "
     for p in d['required']:
         # if prop contains other ids => create relation table
         if d['properties'][p]['type'] == 'array':
-            relation_table_queries += query_create_relation_table(d['title'], p)
+            query_create_relation_table(queries, d['title'], p)
         else:
             s += p + " " + sql_type(d['properties'][p]) + " NOT NULL, "
     s += "PRIMARY KEY (id));"
 
-    return ["DROP TABLE IF EXISTS " + d['title'] + ";", s] + relation_table_queries
+    queries['queries_drop'].append("DROP TABLE IF EXISTS " + d['title'] + ";")
+    queries['queries'].append(s)
 
 
-def query_create_relation_table(from_table, to_table):
+def query_create_relation_table(queries, from_table, to_table):
     s = "CREATE TABLE " + from_table + "_" + to_table + "("
     s += "id INT NOT NULL AUTO_INCREMENT, "
     s += from_table + "_id INT NOT NULL, "
@@ -41,7 +49,8 @@ def query_create_relation_table(from_table, to_table):
     s += "FOREIGN KEY (" + to_table + "_id) REFERENCES " + to_table + "(id)"
     s += ");"
 
-    return ["DROP TABLE IF EXISTS " + from_table + "_" + to_table + ";", s]
+    queries['queries_relation_drop'].append("DROP TABLE IF EXISTS " + from_table + "_" + to_table + ";")
+    queries['queries_relation'].append(s)
 
 
 def sql_type(json_prop):
