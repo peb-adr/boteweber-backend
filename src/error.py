@@ -10,6 +10,10 @@ class BadRequestError(_Error):
     pass
 
 
+class UnauthorizedError(_Error):
+    pass
+
+
 class NotFoundError(_Error):
     pass
 

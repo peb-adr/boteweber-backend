@@ -11,7 +11,9 @@ setup(
         'jsonschema',
         'strict-rfc3339',  # date-time format validation
         'python-dateutil',
-        'mysql-connector-python'
+        'mysql-connector-python',
+        'werkzeug',
+        'pyjwt'
     ],
     entry_points={
         'console_scripts': [

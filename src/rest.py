@@ -1,16 +1,20 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import wraps
 
+import jwt
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
+from werkzeug.security import check_password_hash
 
-from src import sql, error
 from src import schema
+from src import sql, error
 
 app = Flask(__name__)
 CORS(app)
 
 
 def serve():
+    app.config.from_json('../server_config.json')
     app.run(port=26548, debug=True)
 
 
@@ -76,12 +80,93 @@ def post_test():
 
 
 #
+# AUTH
+#
+
+
+@app.route('/adminlogin', methods=['POST'])
+def post_adminlogin():
+    args, code = validate_request_query()
+    if code != 202:
+        return make_response(jsonify(args), code)
+
+    auth = request.authorization
+    if not auth or not auth.username or not auth.password:
+        data = make_error_data(error.UnauthorizedError("Authorization information missing"))
+        code = 401
+        return make_response(jsonify(data), code, {'WWW-Authenticate': 'Basic realm="Login required"'})
+
+    try:
+        data = sql.select_by_id('admin', 1)
+        data = schema.convert_instance_formatted_properties_to_json('admin', data)
+        code = 200
+    except error.NotFoundError or error.DBError as e:
+        data = make_error_data(error.UnauthorizedError("Internal server error"))
+        code = 500
+        return make_response(jsonify(data), code)
+
+    if not auth.username == data['name'] or not check_password_hash(data['password'], auth.password):
+        data = make_error_data(error.UnauthorizedError("Authorization information could not be verified"))
+        code = 401
+        return make_response(jsonify(data), code, {'WWW-Authenticate': 'Basic realm="Login required"'})
+
+    token = jwt.encode({'name': data['name'], 'exp': datetime.utcnow() + timedelta(hours=1)},
+                       app.config['SECRET_KEY'],
+                       algorithm="HS256")
+    data = {'token': token}
+    res = make_response(jsonify(data), code)
+    res.set_cookie('adminToken', token, expires=datetime.now() + timedelta(hours=1), secure=True, httponly=True)
+    return res
+
+
+def admin_token_required():
+    # check for token
+    token = None
+    if 'x-access-token' in request.headers:
+        token = request.headers['x-access-token']
+    # token = request.cookies.get('adminToken')
+    if not token:
+        data = make_error_data(error.UnauthorizedError("Resource not available without suitable access token"))
+        code = 401
+        return data, code
+
+    # validate token
+    try:
+        token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
+    except jwt.exceptions.InvalidTokenError as e:
+        data = make_error_data(error.UnauthorizedError("Access token invalid"))
+        code = 401
+        return data, code
+
+    # validate admin user
+    try:
+        data = sql.select_by_id('admin', 1)
+        data = schema.convert_instance_formatted_properties_to_json('admin', data)
+    except error.NotFoundError or error.DBError as e:
+        data = make_error_data(error.UnauthorizedError("Internal server error"))
+        code = 500
+        return data, code
+    if token_data['name'] != data['name']:
+        data = make_error_data(error.UnauthorizedError("Insufficient permissions"))
+        code = 403
+        return data, code
+
+    data = {}
+    code = 202
+    return data, code
+
+
+#
 # SUBSCRIBERS
 #
 
 
 @app.route('/subscribers', methods=['GET'])
 def get_subscribers():
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query(['page', 'perpage', 'idsonly'])
     if code != 202:
         return make_response(jsonify(args), code)
@@ -110,9 +195,14 @@ def get_subscribers():
 
 @app.route('/subscribers/<int:id>', methods=['GET'])
 def get_subscribers_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
+
     try:
         data = sql.select_by_id('subscriber', id)
         data = schema.convert_instance_formatted_properties_to_json('subscriber', data)
@@ -129,6 +219,10 @@ def get_subscribers_id(id):
 
 @app.route('/subscribers', methods=['POST'])
 def post_subscribers():
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -158,6 +252,10 @@ def post_subscribers():
 
 @app.route('/subscribers/<int:id>', methods=['PUT'])
 def put_subscribers_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -187,6 +285,10 @@ def put_subscribers_id(id):
 
 @app.route('/subscribers/<int:id>', methods=['DELETE'])
 def delete_subscribers_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -210,6 +312,10 @@ def delete_subscribers_id(id):
 
 @app.route('/groups', methods=['GET'])
 def get_groups():
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -227,6 +333,10 @@ def get_groups():
 
 @app.route('/groups/<int:id>', methods=['GET'])
 def get_groups_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -246,6 +356,10 @@ def get_groups_id(id):
 
 @app.route('/groups', methods=['POST'])
 def post_groups():
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -275,6 +389,10 @@ def post_groups():
 
 @app.route('/groups/<int:id>', methods=['PUT'])
 def put_groups_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -304,6 +422,10 @@ def put_groups_id(id):
 
 @app.route('/groups/<int:id>', methods=['DELETE'])
 def delete_groups_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -354,6 +476,10 @@ def get_news():
 
 @app.route('/news/<int:id>', methods=['GET'])
 def get_news_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -373,6 +499,10 @@ def get_news_id(id):
 
 @app.route('/news', methods=['POST'])
 def post_news():
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -402,6 +532,10 @@ def post_news():
 
 @app.route('/news/<int:id>', methods=['PUT'])
 def put_news_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -431,6 +565,10 @@ def put_news_id(id):
 
 @app.route('/news/<int:id>', methods=['DELETE'])
 def delete_news_id(id):
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
@@ -473,6 +611,10 @@ def get_info():
 
 @app.route('/info', methods=['PUT'])
 def put_info():
+    data, code = admin_token_required()
+    if code != 202:
+        return make_response(jsonify(data), code)
+    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
