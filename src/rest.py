@@ -476,10 +476,6 @@ def get_news():
 
 @app.route('/news/<int:id>', methods=['GET'])
 def get_news_id(id):
-    data, code = admin_token_required()
-    if code != 202:
-        return make_response(jsonify(data), code)
-    
     args, code = validate_request_query()
     if code != 202:
         return make_response(jsonify(args), code)
