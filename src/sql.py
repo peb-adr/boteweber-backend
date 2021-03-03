@@ -81,7 +81,7 @@ def select(schema_name, orderby=None, page=None):
         for d in data:
             d.update(select_relational_by_id(schema_name, d['id']))
     except mysql.connector.Error as e:
-        raise error.DBError(e.msg)
+        raise error.DBError(e.errno)
     finally:
         lock.release()
 
@@ -97,7 +97,7 @@ def select_ids(schema_name, orderby=None):
         curs.execute("SELECT id FROM " + d['title'] + query_orderby)
         data = curs.fetchall()
     except mysql.connector.Error as e:
-        raise error.DBError(e.msg)
+        raise error.DBError(e.errno)
     finally:
         lock.release()
 
@@ -118,7 +118,7 @@ def select_by_id(schema_name, id):
         # relational
         data.update(select_relational_by_id(schema_name, id))
     except mysql.connector.Error as e:
-        raise error.DBError(e.msg)
+        raise error.DBError(e.errno)
     finally:
         lock.release()
 
@@ -174,7 +174,7 @@ def update_by_id(schema_name, id, data):
         conn.commit()
     except mysql.connector.Error as e:
         conn.rollback()
-        raise error.DBError(e.msg)
+        raise error.DBError(e.errno)
     except error.NotFoundError as e:
         conn.rollback()
         raise e
@@ -198,7 +198,7 @@ def delete_by_id(schema_name, id):
         conn.commit()
     except mysql.connector.Error as e:
         conn.rollback()
-        raise error.DBError(e.msg)
+        raise error.DBError(e.errno)
     except error.NotFoundError as e:
         conn.rollback()
         raise e
