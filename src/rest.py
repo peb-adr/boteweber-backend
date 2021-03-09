@@ -10,7 +10,7 @@ from src import schema
 from src import sql, error
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=['http://localhost:4200', 'https://boteweber.de:443'])
 
 
 def serve():
