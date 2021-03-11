@@ -3,3 +3,7 @@
 
 PYTHONPATH=. python3 tools/create_tables_from_schemas.py | sudo mysql -u root boteweber
 sudo mysql -u root boteweber < sqldump/dummy_data.sql
+
+
+adjust backendUrl in frontend/globals
+adjust origins in rest.py
