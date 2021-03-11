@@ -316,13 +316,24 @@ def get_groups():
     if code != 202:
         return make_response(jsonify(data), code)
     
-    args, code = validate_request_query()
+    args, code = validate_request_query(['page', 'perpage', 'idsonly'])
     if code != 202:
         return make_response(jsonify(args), code)
+
+    page = None
+    if 'page' in args:
+        if 'perpage' in args:
+            page = (args['page'], args['perpage'])
+        else:
+            page = (args['page'], 3)
+
     try:
-        data = sql.select('group')
-        for i in range(0, len(data)):
-            data[i] = schema.convert_instance_formatted_properties_to_json('group', data[i])
+        if 'idsonly' not in args:
+            data = sql.select('group', orderby=['name ASC'], page=page)
+            for i in range(0, len(data)):
+                data[i] = schema.convert_instance_formatted_properties_to_json('group', data[i])
+        else:
+            data = sql.select_ids('group', orderby=['name ASC'])
         code = 200
     except error.DBError as e:
         data = make_error_data(e)
