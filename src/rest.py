@@ -119,7 +119,8 @@ def post_adminlogin():
     return res
 
 
-def admin_token_required():
+@app.route('/adminverify', methods=['POST'])
+def verify_admin_token():
     # check for token
     token = None
     if 'x-access-token' in request.headers:
@@ -163,7 +164,7 @@ def admin_token_required():
 
 @app.route('/subscribers', methods=['GET'])
 def get_subscribers():
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -195,7 +196,7 @@ def get_subscribers():
 
 @app.route('/subscribers/<int:id>', methods=['GET'])
 def get_subscribers_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -219,7 +220,7 @@ def get_subscribers_id(id):
 
 @app.route('/subscribers', methods=['POST'])
 def post_subscribers():
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -252,7 +253,7 @@ def post_subscribers():
 
 @app.route('/subscribers/<int:id>', methods=['PUT'])
 def put_subscribers_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -285,7 +286,7 @@ def put_subscribers_id(id):
 
 @app.route('/subscribers/<int:id>', methods=['DELETE'])
 def delete_subscribers_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -312,7 +313,7 @@ def delete_subscribers_id(id):
 
 @app.route('/groups', methods=['GET'])
 def get_groups():
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -344,7 +345,7 @@ def get_groups():
 
 @app.route('/groups/<int:id>', methods=['GET'])
 def get_groups_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -367,7 +368,7 @@ def get_groups_id(id):
 
 @app.route('/groups', methods=['POST'])
 def post_groups():
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -400,7 +401,7 @@ def post_groups():
 
 @app.route('/groups/<int:id>', methods=['PUT'])
 def put_groups_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -433,7 +434,7 @@ def put_groups_id(id):
 
 @app.route('/groups/<int:id>', methods=['DELETE'])
 def delete_groups_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -506,7 +507,7 @@ def get_news_id(id):
 
 @app.route('/news', methods=['POST'])
 def post_news():
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -539,7 +540,7 @@ def post_news():
 
 @app.route('/news/<int:id>', methods=['PUT'])
 def put_news_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -572,7 +573,7 @@ def put_news_id(id):
 
 @app.route('/news/<int:id>', methods=['DELETE'])
 def delete_news_id(id):
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
@@ -618,7 +619,7 @@ def get_info():
 
 @app.route('/info', methods=['PUT'])
 def put_info():
-    data, code = admin_token_required()
+    data, code = verify_admin_token()
     if code != 202:
         return make_response(jsonify(data), code)
     
