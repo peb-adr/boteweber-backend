@@ -119,7 +119,7 @@ def post_adminlogin():
     return res
 
 
-@app.route('/adminverify', methods=['POST'])
+@app.route('/adminverify', methods=['GET'])
 def verify_admin_token():
     # check for token
     token = None
@@ -134,8 +134,12 @@ def verify_admin_token():
     # validate token
     try:
         token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
+    except jwt.exceptions.ExpiredSignatureError as e:
+        data = make_error_data(error.UnauthorizedError("Access token expired, please login again"))
+        code = 401
+        return data, code
     except jwt.exceptions.InvalidTokenError as e:
-        data = make_error_data(error.UnauthorizedError("Access token invalid"))
+        data = make_error_data(error.UnauthorizedError("Access token invalid, please login again"))
         code = 401
         return data, code
 
@@ -152,9 +156,9 @@ def verify_admin_token():
         code = 403
         return data, code
 
-    data = {}
+    data = {'token': token}
     code = 202
-    return data, code
+    return jsonify(data), code
 
 
 #
