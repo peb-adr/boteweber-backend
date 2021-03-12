@@ -15,7 +15,9 @@ CORS(app, origins=['http://localhost:4200', 'https://boteweber.de:443'])
 
 def serve():
     app.config.from_json('../server_config.json')
-    app.run(port=26548, debug=True)
+    host = 'localhost'
+    port = 26548
+    app.run(host=host, port=port, debug=True)
 
 
 # following HTTP status codes are used:
