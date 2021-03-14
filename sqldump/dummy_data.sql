@@ -1,9 +1,9 @@
 
-INSERT INTO info (text, greet_ny_top, greet_ny_bot, greet_no_top, greet_no_bot) VALUES
+INSERT INTO `info` (`text`, `greet_ny_top`, `greet_ny_bot`, `greet_no_top`, `greet_no_bot`) VALUES
     ('<p>Haben Sie eine Lieferung von oder nach Norderney?<br>Oder etwa eine Führerschein- oder KFZ-Angelegenheit und wollen nicht selber nach Aurich fahren?</p><h4>Melden Sie sich!</h4><p>tel.: 04932 927939 (Mo - Fr 16:30 - 18:30 Uhr)<br>mail: <a href=\"mailto:info@boteweber.de\">info@boteweber.de</a></p>','<p>Am Hafen 14&nbsp;<br>26548 Norderney</p>','<p>Annahme &amp; Büro:&nbsp;<br>Mo - Do 16:30 - 18:30 Uhr&nbsp;<br>So 18:00 - 19:00 Uhr</p>','<p>Glückauf 15&nbsp;<br>26506 Norden</p>','<p>Annahme (bei C.E. Popken im Laden):&nbsp;<br>Mo - Fr 8:30 - 18:00 Uhr&nbsp;<br>Sa 8:00 - 13:00 Uhr&nbsp;<br><br>Annahme (persönlich vor Ort):&nbsp;<br>Mo - Fr 9:30 - 10:30 Uhr</p>');
 
 
-INSERT INTO news (title, message, timestamp, priority) VALUES
+INSERT INTO `news` (`title`, `message`, `timestamp`, `priority`) VALUES
     ('<p>Verschlafen</p>','<p>Mahlzeit, heute war das Bett leider zu gemütlich. Mit Verspätungen muss gerechnet werden. Sorry!</p>','2012-05-29 19:30:03', 1),
     ('<p>Wieder pünktlich</p>','<p>Heute läuft wieder alles wie gewohnt.</p>','2012-05-10 19:30:03', 1),
     ('<p>Titel nummer 1</p>','<p>Langer sinnvoller Text nummer 1</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eget elit ac dictum. Proin vestibulum consequat nunc, at placerat leo consequat sit amet. Nullam eleifend elementum ultricies. Integer viverra, justo id congue auctor, elit leo condimentum ipsum, vitae interdum tortor augue sit amet est. Fusce felis turpis, tempus vitae neque a, consectetur congue tortor. Quisque ac neque et ex pretium aliquet. Sed eget sapien urna. Nunc quam massa, convallis sed ultrices quis, pharetra ac lorem.</p>','2012-05-29 19:31:03', 1),
@@ -102,7 +102,7 @@ INSERT INTO news (title, message, timestamp, priority) VALUES
     ('<p>Titel nummer 94</p>','<p>Langer sinnvoller Text nummer 94</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eget elit ac dictum. Proin vestibulum consequat nunc, at placerat leo consequat sit amet. Nullam eleifend elementum ultricies. Integer viverra, justo id congue auctor, elit leo condimentum ipsum, vitae interdum tortor augue sit amet est. Fusce felis turpis, tempus vitae neque a, consectetur congue tortor. Quisque ac neque et ex pretium aliquet. Sed eget sapien urna. Nunc quam massa, convallis sed ultrices quis, pharetra ac lorem.</p>','2012-05-29 19:31:03', 1);
 
 
-INSERT INTO subscribers (email, name) VALUES
+INSERT INTO `subscribers` (`email`, `name`) VALUES
     ('ad@cool.com','Adrian Richter'),
     ('dehns@example.com','Dehns'),
     ('ttest@uos.de','Tom Test'),
@@ -231,19 +231,19 @@ INSERT INTO subscribers (email, name) VALUES
     ('lol122@kek122.de','Nummer122'),
     ('lol123@kek123.de','Nummer123');
 
-INSERT INTO groups (name) VALUES
+INSERT INTO `groups` (`name`) VALUES
     ('privat'),
     ('alle');
 
 
-INSERT INTO subscribers_groups (subscribers_id, groups_id) VALUES
+INSERT INTO `subscribers_groups` (`subscribers_id`, `groups_id`) VALUES
     (3,1),
     (4,2);
 
-INSERT INTO groups_subscribers (groups_id, subscribers_id) VALUES
+INSERT INTO `groups_subscribers` (`groups_id`, `subscribers_id`) VALUES
     (1,3),
     (2,4);
 
 
-INSERT INTO admin (name, password) VALUES
+INSERT INTO `admin` (`name`, `password`) VALUES
     ('admin','pbkdf2:sha256:150000$bMfuk4Nt$d7c5db7e4fe0234aefbb370877a4aae31e7b41c51e04a454063f82a1bc678b99');

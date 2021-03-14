@@ -26,30 +26,30 @@ def query_create_table(queries, schema_name):
     if not d:
         return
 
-    s = "CREATE TABLE " + d['title'] + " (id INT NOT NULL AUTO_INCREMENT, "
+    s = "CREATE TABLE `" + d['title'] + "` (`id` INT NOT NULL AUTO_INCREMENT, "
     for p in d['required']:
         # if prop contains other ids => create relation table
         if d['properties'][p]['type'] == 'array':
             query_create_relation_table(queries, d['title'], p)
         else:
-            s += p + " " + sql_type(d['properties'][p]) + " NOT NULL, "
-    s += "PRIMARY KEY (id));"
+            s += "`" + p + "` " + sql_type(d['properties'][p]) + " NOT NULL, "
+    s += "PRIMARY KEY (`id`));"
 
-    queries['queries_drop'].append("DROP TABLE IF EXISTS " + d['title'] + ";")
+    queries['queries_drop'].append("DROP TABLE IF EXISTS `" + d['title'] + "`;")
     queries['queries'].append(s)
 
 
 def query_create_relation_table(queries, from_table, to_table):
-    s = "CREATE TABLE " + from_table + "_" + to_table + "("
-    s += "id INT NOT NULL AUTO_INCREMENT, "
-    s += from_table + "_id INT NOT NULL, "
-    s += to_table + "_id INT NOT NULL, "
-    s += "PRIMARY KEY (id), "
-    s += "FOREIGN KEY (" + from_table + "_id) REFERENCES " + from_table + "(id), "
-    s += "FOREIGN KEY (" + to_table + "_id) REFERENCES " + to_table + "(id)"
+    s = "CREATE TABLE `" + from_table + "_" + to_table + "`("
+    s += "`id` INT NOT NULL AUTO_INCREMENT, "
+    s += "`" + from_table + "_id` INT NOT NULL, "
+    s += "`" + to_table + "_id` INT NOT NULL, "
+    s += "PRIMARY KEY (`id`), "
+    s += "FOREIGN KEY (`" + from_table + "_id`) REFERENCES `" + from_table + "`(`id`), "
+    s += "FOREIGN KEY (`" + to_table + "_id`) REFERENCES `" + to_table + "`(`id`)"
     s += ");"
 
-    queries['queries_relation_drop'].append("DROP TABLE IF EXISTS " + from_table + "_" + to_table + ";")
+    queries['queries_relation_drop'].append("DROP TABLE IF EXISTS `" + from_table + "_" + to_table + "`;")
     queries['queries_relation'].append(s)
 
 
