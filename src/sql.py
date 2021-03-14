@@ -7,62 +7,33 @@ import mysql.connector.errors
 from src import error
 from src import schema
 from src import util
+from src import config
 
 conn: mysql.connector.MySQLConnection
 curs: mysql.connector.cursor.MySQLCursorDict
 
 lock: Lock
 
-DB_NAME = 'boteweber'
-TABLES = {
-    'news': (
-        "CREATE TABLE IF NOT EXISTS news ("
-        "  id int NOT NULL AUTO_INCREMENT,"
-        "  timestamp datetime NOT NULL,"
-        "  title text NOT NULL,"
-        "  message text NOT NULL,"
-        "  PRIMARY KEY (id)"
-        ")"
-    ),
-    'info': (
-        "CREATE TABLE IF NOT EXISTS info ("
-        "  id int NOT NULL AUTO_INCREMENT,"
-        "  text text NOT NULL,"
-        "  greets_he_top text NOT NULL,"
-        "  greets_he_bot text NOT NULL,"
-        "  greets_moin_top text NOT NULL,"
-        "  greets_moin_bot text NOT NULL,"
-        "  PRIMARY KEY (id)"
-        ")"
-    )
-}
 
-
-def init(conn_config):
+def init():
     global conn
     global curs
     global lock
 
     try:
-        conn = mysql.connector.connect(**conn_config)
+        conn = mysql.connector.connect(host=config.sql['host'],
+                                       user=config.sql['user'],
+                                       password=config.sql['password'])
     except mysql.connector.Error as e:
         print(e)
         exit(1)
 
     curs = conn.cursor(dictionary=True, buffered=True)
     try:
-        curs.execute("USE {}".format(DB_NAME))
+        curs.execute("USE {}".format(config.sql['database']))
     except mysql.connector.Error as e:
         print(e)
         exit(1)
-
-    for t in TABLES.values():
-        try:
-            curs.execute(t)
-            conn.commit()
-        except mysql.connector.Error as e:
-            print(e)
-            exit(1)
 
     lock = Lock()
 

@@ -126,4 +126,6 @@ dmypy.json
 .idea/
 
 
-sql_conn_config.json
+rest_config.json
+smtp_config.json
+sql_config.json

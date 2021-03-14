@@ -7,13 +7,13 @@ from werkzeug.security import check_password_hash
 
 from src import schema
 from src import sql, error
+from src import config
 
 app = Flask(__name__)
 CORS(app, origins=['http://localhost:4200', 'https://boteweber.de:443'])
 
 
 def serve():
-    app.config.from_json('../server_config.json')
     host = 'localhost'
     port = 26548
     app.run(host=host, port=port, debug=True)
@@ -101,7 +101,7 @@ def post_adminlogin():
         data = sql.select_by_id('admin', 1)
         data = schema.convert_instance_formatted_properties_to_json('admin', data)
         code = 200
-    except error.NotFoundError or error.DBError as e:
+    except error.NotFoundError or error.DBError:
         data = make_error_data(error.UnauthorizedError("Internal server error"))
         code = 500
         return make_response(jsonify(data), code)
@@ -112,7 +112,7 @@ def post_adminlogin():
         return make_response(jsonify(data), code, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
     token = jwt.encode({'name': data['name'], 'exp': datetime.utcnow() + timedelta(hours=1)},
-                       app.config['SECRET_KEY'],
+                       config.rest['SECRET_KEY'],
                        algorithm="HS256")
     data = {'token': token}
     res = make_response(jsonify(data), code)
@@ -134,12 +134,12 @@ def verify_admin_token():
 
     # validate token
     try:
-        token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
-    except jwt.exceptions.ExpiredSignatureError as e:
+        token_data = jwt.decode(token, config.rest['SECRET_KEY'], algorithms="HS256")
+    except jwt.exceptions.ExpiredSignatureError:
         data = make_error_data(error.UnauthorizedError("Access token expired, please login again"))
         code = 401
         return data, code
-    except jwt.exceptions.InvalidTokenError as e:
+    except jwt.exceptions.InvalidTokenError:
         data = make_error_data(error.UnauthorizedError("Access token invalid, please login again"))
         code = 401
         return data, code
@@ -148,7 +148,7 @@ def verify_admin_token():
     try:
         data = sql.select_by_id('admin', 1)
         data = schema.convert_instance_formatted_properties_to_json('admin', data)
-    except error.NotFoundError or error.DBError as e:
+    except error.NotFoundError or error.DBError:
         data = make_error_data(error.UnauthorizedError("Internal server error"))
         code = 500
         return data, code
